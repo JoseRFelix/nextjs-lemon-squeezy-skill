@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lemon Squeezy Subscription Demo
 
-## Getting Started
+This project implements a minimal subscription flow in Next.js using:
 
-First, run the development server:
+- the official `@lemonsqueezy/lemonsqueezy.js` SDK
+- App Router route handlers for checkout creation and webhook verification
+- Lemon.js for the overlay checkout experience
+
+## Setup
+
+1. Copy the example env file:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Fill in your Lemon Squeezy values:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+LEMONSQUEEZY_API_KEY=...
+LEMONSQUEEZY_STORE_ID=...
+LEMONSQUEEZY_WEBHOOK_SECRET=...
+LEMONSQUEEZY_MONTHLY_VARIANT_ID=...
+LEMONSQUEEZY_YEARLY_VARIANT_ID=...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`LEMONSQUEEZY_YEARLY_VARIANT_ID` is optional if you only want one plan.
 
-## Learn More
+3. Start the app:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Open [http://localhost:3000](http://localhost:3000).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## What the app does
 
-## Deploy on Vercel
+- Renders subscription pricing on `app/page.tsx`
+- Creates checkouts on demand through `app/api/checkout/route.ts`
+- Verifies webhook signatures in `app/api/webhooks/route.ts`
+- Redirects successful purchases to `app/success/page.tsx`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Lemon Squeezy dashboard setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create a webhook in Lemon Squeezy that points to:
+
+```text
+https://your-domain.com/api/webhooks
+```
+
+For local development, expose your app with a tunnel and use the tunneled URL instead.
+
+Recommended subscription events:
+
+- `subscription_created`
+- `subscription_updated`
+- `subscription_cancelled`
+- `subscription_resumed`
+- `subscription_expired`
+- `subscription_payment_success`
+- `subscription_payment_failed`
+
+## Local development notes
+
+- Use a Lemon Squeezy test-mode API key and store while developing.
+- Set `LEMONSQUEEZY_TEST_MODE=true` when using test mode.
+- The webhook route currently verifies the signature and logs the event. Replace the log with a database upsert when you connect subscriptions to users.
