@@ -3,8 +3,8 @@
 This project implements a minimal subscription flow in Next.js using:
 
 - the official `@lemonsqueezy/lemonsqueezy.js` SDK
-- App Router route handlers for checkout creation and webhook verification
-- Lemon.js for the overlay checkout experience
+- App Router Route Handlers for checkout creation and webhook verification
+- Server Actions as the preferred checkout pattern for in-app use
 
 ## Setup
 
@@ -24,7 +24,7 @@ LEMONSQUEEZY_MONTHLY_VARIANT_ID=...
 LEMONSQUEEZY_YEARLY_VARIANT_ID=...
 ```
 
-`LEMONSQUEEZY_YEARLY_VARIANT_ID` is optional if you only want one plan.
+Both variant IDs are required. To use a single plan, create two variants pointing to the same product.
 
 3. Start the app:
 
@@ -66,3 +66,35 @@ Recommended subscription events:
 - Use a Lemon Squeezy test-mode API key and store while developing.
 - Set `LEMONSQUEEZY_TEST_MODE=true` when using test mode.
 - The webhook route currently verifies the signature and logs the event. Replace the log with a database upsert when you connect subscriptions to users.
+
+## Agent skill
+
+This repo includes a reusable [Lemon Squeezy agent skill](skills/lemonsqueezy-integration/SKILL.md) that teaches coding agents how to integrate Lemon Squeezy into any Next.js project. It covers SDK setup, checkout flows, webhook verification, subscription recovery, and environment configuration.
+
+### Using the skill in this project
+
+The skill is already active for Cursor via a symlink at `.cursor/skills/lemonsqueezy-integration`. No extra setup is needed — Cursor picks it up automatically.
+
+### Installing the skill in another project
+
+Use the [`skills` CLI](https://github.com/vercel-labs/skills) to install it into any supported agent (Cursor, Claude Code, Codex, Windsurf, Cline, and 40+ others):
+
+```bash
+# From GitHub
+npx skills add JoseRFelix/nextjs-lemon-squeezy-example
+
+# From a local clone
+npx skills add ./path/to/nextjs-lemon-squeezy-example
+```
+
+You can also target specific agents or install globally:
+
+```bash
+# Install to Cursor and Claude Code only
+npx skills add JoseRFelix/nextjs-lemon-squeezy-example -a cursor -a claude-code
+
+# Install globally (available across all projects)
+npx skills add JoseRFelix/nextjs-lemon-squeezy-example -g
+```
+
+Run `npx skills add JoseRFelix/nextjs-lemon-squeezy-example --list` to preview available skills before installing.

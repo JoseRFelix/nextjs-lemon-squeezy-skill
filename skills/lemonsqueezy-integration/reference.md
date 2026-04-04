@@ -7,13 +7,12 @@ framework conventions to your project.
 
 ## Environment Schema
 
-Using `@t3-oss/env-nextjs` + Zod:
+Add the Lemon Squeezy server vars to the project's existing `@t3-oss/env-nextjs`
+`createEnv()` call (typically `lib/env.ts`). Do **not** create a separate env
+file — colocate with the rest of the project's env vars:
 
 ```ts
-// env.ts
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
-
+// lib/env.ts — add to the existing createEnv() server section
 const positiveInteger = z.coerce.number().int().positive();
 
 const booleanWithDefaultFalse = z
@@ -21,36 +20,38 @@ const booleanWithDefaultFalse = z
   .optional()
   .transform((value) => value === "true" || value === "1");
 
-export const env = createEnv({
+// inside createEnv({
   server: {
+    // ...existing server vars...
     LEMONSQUEEZY_API_KEY: z.string().min(1),
     LEMONSQUEEZY_STORE_ID: positiveInteger,
-    LEMONSQUEEZY_WEBHOOK_SECRET: z.string().min(1).optional(),
     LEMONSQUEEZY_MONTHLY_VARIANT_ID: positiveInteger,
     LEMONSQUEEZY_YEARLY_VARIANT_ID: positiveInteger,
     LEMONSQUEEZY_TEST_MODE: booleanWithDefaultFalse,
     LEMONSQUEEZY_REDIRECT_URL: z.string().url().optional(),
   },
-  client: {},
+  // ...existing client vars...
   runtimeEnv: {
+    // ...existing runtimeEnv entries...
     LEMONSQUEEZY_API_KEY: process.env.LEMONSQUEEZY_API_KEY,
     LEMONSQUEEZY_STORE_ID: process.env.LEMONSQUEEZY_STORE_ID,
-    LEMONSQUEEZY_WEBHOOK_SECRET: process.env.LEMONSQUEEZY_WEBHOOK_SECRET,
     LEMONSQUEEZY_MONTHLY_VARIANT_ID: process.env.LEMONSQUEEZY_MONTHLY_VARIANT_ID,
     LEMONSQUEEZY_YEARLY_VARIANT_ID: process.env.LEMONSQUEEZY_YEARLY_VARIANT_ID,
     LEMONSQUEEZY_TEST_MODE: process.env.LEMONSQUEEZY_TEST_MODE,
     LEMONSQUEEZY_REDIRECT_URL: process.env.LEMONSQUEEZY_REDIRECT_URL,
   },
   emptyStringAsUndefined: true,
-});
+// })
 ```
+
+The webhook secret (`LEMONSQUEEZY_WEBHOOK_SECRET`) is stored in the Convex env
+since the webhook handler runs as a Convex HTTP action.
 
 `.env.example`:
 
 ```
 LEMONSQUEEZY_API_KEY=
 LEMONSQUEEZY_STORE_ID=
-LEMONSQUEEZY_WEBHOOK_SECRET=
 LEMONSQUEEZY_MONTHLY_VARIANT_ID=
 LEMONSQUEEZY_YEARLY_VARIANT_ID=
 LEMONSQUEEZY_TEST_MODE=false
@@ -71,7 +72,7 @@ import {
   listPrices,
   listSubscriptions,
 } from "@lemonsqueezy/lemonsqueezy.js";
-import { env } from "@/env";
+import { env } from "@lib/env";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -393,7 +394,7 @@ the background so Lemon Squeezy doesn't time out waiting for your handler.
 // app/api/webhooks/route.ts
 import crypto from "node:crypto";
 import { after } from "next/server";
-import { env } from "@/env";
+import { env } from "@lib/env";
 
 export async function POST(request: Request) {
   const secret = env.LEMONSQUEEZY_WEBHOOK_SECRET;
