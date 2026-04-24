@@ -1,13 +1,12 @@
 ---
-
-## name: lemonsqueezy-integration
-
+name: lemonsqueezy-integration
 description: >-
   Integrate Lemon Squeezy payments and subscriptions using
   @lemonsqueezy/lemonsqueezy.js. Covers SDK setup, hosted checkout, webhook
   signature verification, subscription recovery, and environment variable
   configuration. Use when adding Lemon Squeezy, payments, checkout, webhooks,
   subscriptions, or billing to a project.
+---
 
 # Lemon Squeezy Integration
 
